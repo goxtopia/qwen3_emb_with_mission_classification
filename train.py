@@ -5,9 +5,10 @@ from sentence_transformers import losses
 import torch.multiprocessing as mp
 from torch.multiprocessing import Pool
 from math import ceil
-from accelerate import Accelerator
+from accelerate import Accelerator, DistributedDataParallelKwargs
 
-accelerator = Accelerator()
+ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
+accelerator = Accelerator(kwargs_handlers=[ddp_kwargs])
 device = accelerator.device
 
 class NormQuantAwareCosineSimilarityLoss(nn.Module):
