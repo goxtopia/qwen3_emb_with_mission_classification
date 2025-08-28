@@ -293,6 +293,7 @@ def main():
         bf16=torch.cuda.is_available() and torch.cuda.is_bf16_supported(),
         fp16=torch.cuda.is_available() and not torch.cuda.is_bf16_supported(),
         dataloader_num_workers=DATALOADER_NUM_WORKERS,
+        optim="adamw_8bit", # 使用 8-bit AdamW 优化器
     )
     
     # --- 7. 创建并启动训练器 (Trainer Setup & Execution) ---
