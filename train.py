@@ -169,7 +169,7 @@ def main():
     # --------------------------------------------------
     model = SentenceTransformer(
         "heyanzhuo/Qwen3-Embedding-0.6B-Base-Mod",
-        model_kwargs={"device_map": "auto"}, # , "torch_dtype": "bfloat16" "attn_implementation": "flash_attention_2", 
+        model_kwargs={}, # , "torch_dtype": "bfloat16" "attn_implementation": "flash_attention_2",  "device_map": "auto"
         tokenizer_kwargs={"padding_side": "left"},
     )
     model.to(device)
