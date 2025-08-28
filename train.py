@@ -200,7 +200,7 @@ def main():
     # --------------------------------------------------
     # Your evaluator setup is likely already perfect for this, as it probably
     # uses EmbeddingSimilarityEvaluator which works with paired data.
-    evaluator = get_evaluator(dev_examples, batch_size=8)
+    evaluator = get_evaluator(dev_examples, batch_size=2)
 
     # --------------------------------------------------
     # 6️⃣ 训练
@@ -208,7 +208,7 @@ def main():
     num_epochs = 1
     # We need to calculate warmup_steps based on the dataset size and batch size
     # Effective batch size = per_device_train_batch_size * gradient_accumulation_steps
-    effective_batch_size = 4 * 8
+    effective_batch_size = 32
     steps_per_epoch = len(train_dataset) // effective_batch_size
     warmup_steps = int(0.1 * steps_per_epoch * num_epochs)
 
@@ -219,9 +219,9 @@ def main():
         args=SentenceTransformerTrainingArguments(
             output_dir=output_dir,
             num_train_epochs=num_epochs,
-            per_device_train_batch_size=2,
-            per_device_eval_batch_size=2,
-            gradient_accumulation_steps=16, # Effective batch size = 4 * 8 = 32
+            per_device_train_batch_size=1,
+            per_device_eval_batch_size=1,
+            gradient_accumulation_steps=32, # Effective batch size = 4 * 8 = 32
             warmup_steps=warmup_steps,
             weight_decay=0.01,
             learning_rate=2e-5,
