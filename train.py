@@ -174,6 +174,8 @@ def main():
         tokenizer_kwargs={"padding_side": "left"},
     )
     model.to(device)
+
+    model[0].auto_model.gradient_checkpointing_enable() 
     
     quantize_(model, IntXQuantizationAwareTrainingConfig(activation_config, weight_config))
     print(f"Model built on {device}, embedding dimension = {model.get_sentence_embedding_dimension()}")
