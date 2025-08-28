@@ -152,8 +152,8 @@ def load_and_prepare_data():
     return train_examples, dev_examples
 
 # --- Quantization Config (no change) ---
-activation_config = FakeQuantizeConfig(torch.int8, "per_token", is_symmetric=False, scale_precision=torch.float32)
-weight_config = FakeQuantizeConfig(torch.int8, group_size=256, is_symmetric=True, scale_precision=torch.float32)
+activation_config = FakeQuantizeConfig(torch.int8, "per_token", is_symmetric=False, scale_precision=torch.float16)
+weight_config = FakeQuantizeConfig(torch.int8, group_size=256, is_symmetric=True, scale_precision=torch.float16)
 
 
 def main():
