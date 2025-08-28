@@ -5,77 +5,10 @@ from sentence_transformers import losses
 import torch.multiprocessing as mp
 from torch.multiprocessing import Pool
 from math import ceil
+from accelerate import Accelerator
 
-def process_chunk(chunk, device_id, model_class, model_args):
-    """
-    Process a chunk of sentence features on the specified GPU.
-    Args:
-        chunk: List of sentence features for this process.
-        device_id: CUDA device ID (e.g., 'cuda:0' or 'cuda:1').
-        model_class: The class or function to instantiate the model.
-        model_args: Arguments to initialize the model.
-    Returns:
-        List of sentence embeddings.
-    """
-    # Set the device for this process
-    device = torch.device(device_id)
-    # Instantiate the model on the specified device
-    model = model_class(*model_args).to(device)
-    model.eval()  # Set to evaluation mode
-    embeddings = []
-    
-    with torch.no_grad():  # Disable gradient computation for inference
-        for sf in chunk:
-            # Ensure input tensors are on the correct device
-            if isinstance(sf, torch.Tensor):
-                sf = sf.to(device)
-            elif isinstance(sf, dict):
-                sf = {k: v.to(device) if isinstance(v, torch.Tensor) else v for k, v in sf.items()}
-            elif isinstance(sf, list):
-                sf = [x.to(device) if isinstance(x, torch.Tensor) else x for x in sf]
-            
-            # Compute embedding
-            output = model(sf)['sentence_embedding']
-            embeddings.append(output)
-    
-    return embeddings
-
-def parallel_compute_embeddings(sentence_features, model_class, model_args, num_gpus=2):
-    """
-    Compute embeddings in parallel across multiple GPUs and move results to CUDA:0.
-    Args:
-        sentence_features: List of input sentence features.
-        model_class: The class or function to instantiate the model.
-        model_args: Arguments to initialize the model.
-        num_gpus: Number of GPUs to use (default: 2).
-    Returns:
-        List of embeddings on CUDA:0.
-    """
-    # Ensure multiprocessing uses 'spawn' to avoid issues with CUDA
-    mp.set_start_method('spawn', force=True)
-    
-    # Split sentence_features into chunks for each GPU
-    chunk_size = ceil(len(sentence_features) / num_gpus)
-    chunks = [sentence_features[i:i + chunk_size] for i in range(0, len(sentence_features), chunk_size)]
-    
-    # Assign devices
-    devices = ['cuda:0', 'cuda:1'][:min(num_gpus, len(chunks))]
-    
-    # Prepare arguments for each process
-    args = [(chunks[i], devices[i], model_class, model_args) for i in range(len(chunks))]
-    
-    # Run processes in parallel
-    with Pool(processes=len(chunks)) as pool:
-        results = pool.starmap(process_chunk, args)
-    
-    # Flatten results and move to cuda:0
-    embeddings = []
-    for chunk_embeddings in results:
-        for emb in chunk_embeddings:
-            embeddings.append(emb.to('cuda:0'))
-    
-    return embeddings
-
+accelerator = Accelerator()
+device = accelerator.device
 
 class NormQuantAwareCosineSimilarityLoss(nn.Module):
     def __init__(self, model, alpha=0.2, quant_levels=16):
@@ -228,7 +161,6 @@ def main():
     # --------------------------------------------------
     base_model = "heyanzhuo/Qwen3-Embedding-0.6B-Base-Mod"
     use_flash = True
-    device = "cuda" if torch.cuda.is_available() else "cpu"
     output_dir = "./trained_sent_transformer_v2_qat_mul"
     os.makedirs(output_dir, exist_ok=True)
 
