@@ -17,7 +17,7 @@ for item in dataset['train']:
     tools = item['all_funcs']
     answers = item['func']
 
-    if len(query) > 4 * 8000:
+    if len(query) > 4 * 4000:
         # about 8000 words - 8000 or less tokens
         continue
 
