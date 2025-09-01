@@ -255,7 +255,7 @@ def main():
     )
     model.to(device)
 
-    model[0].auto_model.gradient_checkpointing_enable()
+    # model[0].auto_model.gradient_checkpointing_enable()
 
     # 应用 QAT
     quantize_(model, qat_config)
