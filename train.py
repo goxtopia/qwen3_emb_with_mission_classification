@@ -258,7 +258,7 @@ def main():
     # model[0].auto_model.gradient_checkpointing_enable()
 
     # 应用 QAT
-    quantize_(model, qat_config)
+    # quantize_(model, qat_config) # currently disable qat for saving mem
     print(f"Model built on {device}, embedding dimension = {model.get_sentence_embedding_dimension()}")
     print("Quantization-Aware Training (QAT) has been applied to the model.")
 
