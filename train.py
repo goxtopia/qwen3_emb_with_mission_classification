@@ -252,6 +252,7 @@ def main():
     model = SentenceTransformer(
         BASE_MODEL,
         tokenizer_kwargs={"padding_side": "left"},
+        model_kwargs={"attn_implementation": "sdpa"}
     )
     model.to(device)
 
